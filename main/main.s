@@ -21,18 +21,8 @@
 # 320 x 240 = 76800
 
 .data
-	board0: .word 1, 0, 1, 0, 1, 0, 1, 0
-	board1: .word 0, 1, 0, 1, 0, 1, 0, 1
-	board2: .word 1, 0, 1, 0, 1, 0, 1, 0
-	board3: .word 0, 0, 0, 0, 0, 0, 0, 0
-	board4: .word 0, 0, 0, 0, 0, 0, 0, 0
-	board5: .word 2, 0, 2, 0, 2, 0, 2, 0
-	board6: .word 0, 2, 0, 2, 0, 2, 0, 2
-	board7: .word 2, 0, 2, 0, 2, 0, 2, 0
-
 	file_menu1: .string "menu.bin"
 	file_menu2: .string "menu2.bin"
-	ops: .string "aqui iria pro menu2 IN CONSTRUCTION"
 .text
 
 	# main starts the game calling the game function
