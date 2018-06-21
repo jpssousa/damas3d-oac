@@ -1,18 +1,15 @@
-###############################
-# Trabalho de OAC 2018-1      #
-# Damas 3d com IA de 3 níveis #
-###############################
-
+# Main function
 
 # s0 = initial board address
 # (s0)
 
 # board conventions
-# 0 - empty space
-# 1 - player
-# 2 - cpu
-# 3 - player queen
-# 4 - cpu queen
+# -1 - invalid
+#  0 - empty space
+#  1 - player
+#  2 - cpu
+#  3 - player queen
+#  4 - cpu queen
 
 # VGA INITIAL ADDRESS: 0xFF000000
 # VGA FINAL ADDRESS: 0xFF012C00
