@@ -1,7 +1,17 @@
 # Game loop function
 # Implements the game loop and passes whose turn it is as argument
 
-# a0 = [1,2] # Player 1 or 2
+##########################################
+# s0 is the initial address of the board #
+# s1 is the final address of the board   #
+# s2 is the number of cpu tokens         #
+# s3 is the number of player tokens      #
+##########################################
+
+# memory = [s1][64 bits board][s0][99 bits destinations][1 bit number of destinations][s2]
+
+# Passes as argument to PLAY:
+# a3 = 1 (player 1), 2 (player 2)
 
 .data
 
@@ -13,11 +23,12 @@ GAME_LOOP:
 
 PLAY_LOOP:
 	addi t0, t0, 1
-	mv a0, t0
+	mv a3, t0
 
 	addi sp, sp, -4
 	sw t0, 0(sp)
 
+	# receives a3 = 1 (player 1), 2 (player 2) as argument
 	jal ra, PLAY
 	jal ra, LIFE_CHECK
 

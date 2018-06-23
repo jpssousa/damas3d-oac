@@ -1,10 +1,13 @@
+# File that deals with board creation and initialization of player's life
+
 ##########################################
-# File that generates the board, where   #
 # s0 is the initial address of the board #
-# s1 is the final address                #
-# s2 is the number of player tokens      #
-# s3 is the number of cpu tokens         #
+# s1 is the final address of the board   #
+# s2 is the number of cpu tokens         #
+# s3 is the number of player tokens      #
 ##########################################
+
+# memory = [s1][64 bits board][s0]
 
 .data
 	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
@@ -62,8 +65,8 @@ EXIT_BOARD_LOOP:
 	lw t1, 8(sp)
 	lw t2, 12(sp)
 	addi sp, sp, 16
-	li s2, 12 # player tokens
-	li s3, 12 # cpu tokens
+	li s2, 12 # s3 = player tokens
+	li s3, 12 # s4 = cpu tokens
 	ret
 
 # DEBUG FUNCTION TO PRINT THE BOARD

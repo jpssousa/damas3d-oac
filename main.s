@@ -1,27 +1,102 @@
-# Check function
-
-# Function that checks whether the selected piece can eat
-# if it can eat, returns a0 = 1
-# if it can't eat, returns a0 = 0
-
-##########################################
-# s0 is the initial address of the board #
-# s1 is the final address of the board   #
-# s2 is the number of cpu tokens         #
-# s3 is the number of player tokens      #
-##########################################
-
-# memory = [s1][64 bits board][s0]
-
-# arguments
-# a0 = address of the piece on the board (s0+offset)
-
-# returns
-# a0 = 0 (move), 1 (capture)
+# TESTING CAPTURE CHECK
 
 .data
-
+	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
+	              -1, 1, -1, 1, -1, 1, -1, 1,
+	              1, -1, 1, -1, 1, -1, 1, -1,
+	              -1, 0, -1, 0, -1, 0, -1, 0,
+	              0, -1, 0, -1, 0, -1, 0, -1,
+	              -1, 2, -1, 2, -1, 2, -1, 2,
+	              2, -1, 2, -1, 2, -1, 2, -1,
+	              -1, 2, -1, 2, -1, 2, -1, 2
+	
+	ws: .string " "
+	nl: .string "\n"
 .text
+
+# PLACEHOLDER FUNCTION THAT CALLS INIT_BOARD
+
+PLACEHOLDER:
+	jal ra, INIT_BOARD
+	li a3, 1
+	jal ra, PREPROCESSING
+	li a7, 1
+	ecall
+	li a7, 10
+	ecall
+
+# FUNCTION THAT INITIALIZES THE BOARD
+# THE BOARD IS COMPOSED OF 64 BYTES
+# -1 invalid
+#  0 empty
+#  1 player token
+#  2 cpu token
+#  3 player queen
+#  4 cpu queen
+
+INIT_BOARD:
+	addi sp, sp, -64
+	mv s0, sp	# initial address of board
+	addi s1, s0, 64 # final address of board
+	addi sp, sp, -16
+	sw ra, 0(sp)
+	sw t0, 4(sp)
+	sw t1, 8(sp)
+	sw t2, 12(sp)
+BOARD_INPUT:
+	add t0, s0, zero # temporary address of stack
+	la t1, board0
+BOARD_LOOP:
+	bge t0, s1, EXIT_BOARD_LOOP # if address of stack == final address of board, end loop
+	lb t2, 0(t1)
+	sb t2, 0(t0)
+	addi t0, t0, 1
+	addi t1, t1, 1
+	j BOARD_LOOP
+EXIT_BOARD_LOOP:
+	lw ra, 0(sp)
+	lw t0, 4(sp)
+	lw t1, 8(sp)
+	lw t2, 12(sp)
+	addi sp, sp, 16
+	li s2, 12 # s3 = player tokens
+	li s3, 12 # s4 = cpu tokens
+	ret
+
+# DEBUG FUNCTION TO PRINT THE BOARD
+			
+DEBUG_BOARD:
+	addi sp, sp, -12
+	sw t0, 0(sp)
+	sw t1, 4(sp)
+	sw t2, 8(sp)
+	mv t0, s0	# address
+	li t1, 0	# counter
+	li t2, 8	# limit
+LOOP_DEBUG_BOARD:
+	bge t0, s1, EXIT_DEBUG_BOARD
+	lb a0, 0(t0)
+	li a7, 1
+	ecall
+	la a0, ws
+	li a7, 4
+	ecall
+	addi t0, t0, 1
+	addi t1, t1, 1
+	beq t1, t2, PRINT_NL
+	j LOOP_DEBUG_BOARD
+PRINT_NL:
+	la a0, nl
+	li a7, 4
+	ecall
+	li t1, 0
+	j LOOP_DEBUG_BOARD
+EXIT_DEBUG_BOARD:
+	sw t0, 0(sp)
+	sw t1, 4(sp)
+	sw t2, 8(sp)
+	addi sp, sp, 12
+	ret
 
 CAPTURE_CHECK:
 	addi sp, sp, -20,
@@ -203,6 +278,47 @@ BEHIND_CHECK_P24:
 CAPTURE_TRUE:
 	li a0, 1
 EXIT_CAPTURE_CHECK:
+	lw ra, 0(sp)
+	lw s8, 4(sp)
+	lw s9, 8(sp)
+	lw s10, 12(sp)
+	lw s11, 16(sp)
+	addi sp, sp, 20
+	ret
+
+PREPROCESSING:
+	addi sp, sp, -20
+	sw ra, 0(sp)
+	sw s8, 4(sp)
+	sw s9, 8(sp)
+	sw s10, 12(sp)
+	sw s11, 16(sp)
+
+	mv s8, s0 # s8 = variable board address
+	mv s9, a3 # s9 = normal token from the player
+	addi s10, s9, 2 # s10 = queen token from the player
+PREPROCESSING_LOOP:
+	bge s8, s1, EXIT_PREPROCESSING_LOOP_FALSE # if s8 >= s1 (end of board)
+	
+	lb s11, 0(s8)
+	mv a0, s8
+
+	beq s11, s9, CAPTURE_JMP
+	beq s11, s10, CAPTURE_JMP
+
+	addi s8, s8, 1
+	j PREPROCESSING_LOOP
+CAPTURE_JMP:
+	jal ra, CAPTURE_CHECK
+
+	li t0, 1
+	beq a0, t0, EXIT_PREPROCESSING_LOOP
+
+	addi s8, s8, 1
+	j PREPROCESSING_LOOP
+EXIT_PREPROCESSING_LOOP_FALSE:
+	li a0, 0
+EXIT_PREPROCESSING_LOOP:
 	lw ra, 0(sp)
 	lw s8, 4(sp)
 	lw s9, 8(sp)

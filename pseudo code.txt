@@ -1,0 +1,56 @@
+# PSEUDO CODE IN C-LIKE
+
+a0 = origin      [x]
+a1 = destination [y]
+a2 = need_to_eat [0,1]
+a3 = player_turn [1,2]
+
+void game_loop ()
+{
+	int player_turn = 0;
+
+	while (1)
+	{
+		play(player_turn++);
+		if (!check_life()) game_over();
+
+		player_turn %= 2;
+	}
+}
+
+void play (player_turn)
+{
+	need_to_eat = preprocessing(player_turn);
+	
+	do
+	{
+		x = input();
+		y = input();
+	} while (validate_move(x, y) || validate_capture(x, y));
+
+	postprocessing(x, y, need_to_eat, player_turn);
+}
+
+bool preprocessing (player_turn)
+{
+	for (every piece on the board)
+		if (piece belongs to player)
+			if (capture_check())
+				return 1
+
+	return 0;
+}
+
+int input ()
+{
+	a = get_player_input();
+	b = translate_into_board_address(a);
+
+	return b;
+}
+
+void postprocessing (x, y, need_to_eat, player_turn)
+{
+	swap(x, y);
+
+}
