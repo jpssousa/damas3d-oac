@@ -21,13 +21,21 @@
 PLAY:
 	addi sp, sp, -4
 	sw ra, 0(sp)
-	
-	# passes as argument a3 = 1 (player 1), 2 (player 2)
+	# arguments 
+	# a3 = 1 (player 1), 2 (player 2)
 	jal ra, PREPROCESSING
-	# passes as argument a2 = 0 (move), 1 (capture) and a3 = 1 (player 1), 2 (player 2)
+	# arguments 
+	# a2 = 0 (move), 1 (capture)
+	# a3 = 1 (player 1), 2 (player 2)
+PLAY_AGAIN:
 	jal ra, INPUT
+	# arguments
+	# a0 = origin, 
+	# a1 = destination, 
+	# a2 = 0 (move), 1 (capture) 
+	# a3 = 1 (player 1), 2 (player 2)
+	# a4 = 0 (no capture), address (of the captured piece)
 	#jal ra, POSTPROCESSING
-	
 	lw ra, 0(sp)
 	addi sp, sp, 4
 	

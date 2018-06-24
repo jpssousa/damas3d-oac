@@ -9,6 +9,7 @@
 
 # Returns:
 # a2 = 0 (move), 1 (capture)
+# a3 = 1 (player 1), 2 (player 2)
 
 ##########################################
 # s0 is the initial address of the board #

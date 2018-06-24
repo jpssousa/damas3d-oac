@@ -10,11 +10,16 @@
 # PLAYER_INPUT
 # Returns: a0 = address on the board (origin or destination)
 
-# INPUT
 # Receives as arguments:
 # a2 = 0 (move), 1 (capture)
 # a3 = 1 (player 1), 2 (player 2)
-# a4 = 0 (if didn't capture), address of the capture piece (if you capture)
+
+# Returns:
+# a0 = origin
+# a1 = destination
+# a2 = 0 (move), 1 (capture)
+# a3 = 1 (player 1), 2 (player 2)
+# a4 = 0 (if didn't capture), address of the captured piece (if you capture)
 
 # memory = [s1][64 bits board][s0]
  
@@ -188,7 +193,6 @@ MOVEMENT_PLAY_P34_CHECK_4_LOOP:
     lb t3, 0(t2)
     bne t3, zero, MOVEMENT_PLAY_P34_TP
     j MOVEMENT_PLAY_P34_CHECK_4_LOOP
-    
 MOVEMENT_SUCCESS:
     lb t0, 0(a0)
     lb t1, 0(a1)

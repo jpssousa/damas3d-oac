@@ -65,8 +65,8 @@ EXIT_BOARD_LOOP:
 	lw t1, 8(sp)
 	lw t2, 12(sp)
 	addi sp, sp, 16
-	li s2, 12 # s3 = player tokens
-	li s3, 12 # s4 = cpu tokens
+	li s2, 12 # s2 = player tokens
+	li s3, 12 # s3 = cpu tokens
 	ret
 
 # DEBUG FUNCTION TO PRINT THE BOARD
