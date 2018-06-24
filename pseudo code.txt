@@ -51,6 +51,5 @@ int input ()
 
 void postprocessing (x, y, need_to_eat, player_turn)
 {
-	swap(x, y);
 
 }

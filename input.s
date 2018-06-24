@@ -111,7 +111,6 @@ BASIC_POSTPROCESSING_FAILURE:
 MOVEMENT_PLAY:
     lb t0, 0(a0)
     sub t2, a1, a0
-    
     li t1, 1
     beq t0, t1, MOVEMENT_PLAY_P1
     li t1, 2
@@ -144,7 +143,6 @@ MOVEMENT_PLAY_P34_TP:
     beq t0, t1, MOVEMENT_PLAY_P34_CHECK_3
     li t1, 4
     beq t0, t1, MOVEMENT_PLAY_P34_CHECK_4
-
     j BASIC_POSTPROCESSING_FAILURE
 MOVEMENT_PLAY_P34_CHECK_1:
     addi t0, t0, 1

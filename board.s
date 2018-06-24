@@ -76,18 +76,18 @@ DEBUG_BOARD:
 	sw t0, 0(sp)
 	sw t1, 4(sp)
 	sw t2, 8(sp)
-	mv t0, s0	# address
+	addi t0, s1,-1	# address
 	li t1, 0	# counter
 	li t2, 8	# limit
 LOOP_DEBUG_BOARD:
-	bge t0, s1, EXIT_DEBUG_BOARD
+	blt t0, s0, EXIT_DEBUG_BOARD
 	lb a0, 0(t0)
 	li a7, 1
 	ecall
 	la a0, ws
 	li a7, 4
 	ecall
-	addi t0, t0, 1
+	addi t0, t0, -1
 	addi t1, t1, 1
 	beq t1, t2, PRINT_NL
 	j LOOP_DEBUG_BOARD
