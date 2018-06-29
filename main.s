@@ -3,10 +3,10 @@
 .data
 	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
 	              -1, 1, -1, 1, -1, 1, -1, 1,
-	              1, -1, 1, -1, 1, -1, 1, -1,
+	              3, -1, 1, -1, 1, -1, 1, -1,
 	              -1, 0, -1, 0, -1, 0, -1, 0,
 	              0, -1, 0, -1, 0, -1, 0, -1,
-	              -1, 2, -1, 2, -1, 2, -1, 2,
+	              -1, 2, -1, 2, -1, 4, -1, 2,
 	              2, -1, 2, -1, 2, -1, 2, -1,
 	              -1, 2, -1, 2, -1, 2, -1, 2
 	
@@ -617,7 +617,7 @@ P13_BEHIND_PLAY:
     beq t1, a1, CAPTURE_PLAY_SUCCESS
     lb t2, 0(t1)
     bne t2, zero, P13_CAPTURE_PLAY_TP
-    beq t3, s8, P13_CAPTURE_PLAY_TP
+    beq t3, s8, CAPTURE_PLAY_FAILURE
     j P13_BEHIND_PLAY
 P24_BEHIND_PLAY:
     add t1, t1, t6
@@ -830,8 +830,8 @@ POSTPROCESSING:
 	addi sp, sp, -8
 	sw a0, 0(sp)
 	sw ra, 4(sp)
-	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
-	jal ra, CAPTURE_CHECK
+	bne a2, zero, POSTPROCESSING_CAPTURE_CHECK
+POSTPROCESSING_CONTINUE:
 	lw a0, 0(sp)
 	addi sp, sp, 4
 	bne a2, zero, EXIT_TO_PLAY_AGAIN
@@ -841,10 +841,13 @@ EXIT_POSTPROCESSING:
 	addi sp, sp, 4
 	ret
 EXIT_TO_PLAY_AGAIN:
-	jal ra, DEBUG_BOARD
 	lw ra, 0(sp)
 	addi sp, sp, 4
 	j PLAY_AGAIN
+POSTPROCESSING_CAPTURE_CHECK:
+	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
+	jal ra, CAPTURE_CHECK
+	j POSTPROCESSING_CONTINUE
 
 # FUNCTION TO CHECK FOR PROMOTION OF PAWNS
 

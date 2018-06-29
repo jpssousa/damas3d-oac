@@ -28,8 +28,8 @@ POSTPROCESSING:
 	addi sp, sp, -8
 	sw a0, 0(sp)
 	sw ra, 4(sp)
-	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
-	jal ra, CAPTURE_CHECK
+	bne a2, zero, POSTPROCESSING_CAPTURE_CHECK
+POSTPROCESSING_CONTINUE:
 	lw a0, 0(sp)
 	addi sp, sp, 4
 	bne a2, zero, EXIT_TO_PLAY_AGAIN
@@ -42,6 +42,10 @@ EXIT_TO_PLAY_AGAIN:
 	lw ra, 0(sp)
 	addi sp, sp, 4
 	j PLAY_AGAIN
+POSTPROCESSING_CAPTURE_CHECK:
+	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
+	jal ra, CAPTURE_CHECK
+	j POSTPROCESSING_CONTINUE
 
 # FUNCTION TO CHECK FOR PROMOTION OF PAWNS
 
