@@ -17,11 +17,13 @@
 # a0 = address of the piece on the board (s0+offset)
 
 # returns
-# a0 = 0 (move), 1 (capture)
+# a2 = 0 (move), 1 (capture)
 
 .data
 
 .text
+
+# FUNCTION THAT CHECKS IF A PIECE CAN CAPTURE
 
 CAPTURE_CHECK:
 	addi sp, sp, -20,
@@ -30,19 +32,16 @@ CAPTURE_CHECK:
 	sw s9, 8(sp)
 	sw s10, 12(sp)
 	sw s11, 16(sp)
-
-	li s8, 1
-	li s9, 2
-	li s10, 3
-	li s11, 4
-
+	li s8, 1 # p1
+	li s9, 2 # p2
+	li s10, 3 # queen p1
+	li s11, 4 # queen p2
 	lb t0, 0(a0) # t0 = type of the piece (1,3 (p1) or 2,4 (p2))
 	beq t0, s8, P13_CAPTURE_CHECK
 	beq t0, s9, P24_CAPTURE_CHECK
 	beq t0, s10, P13_CAPTURE_CHECK
 	beq t0, s11, P24_CAPTURE_CHECK
 	j EXIT_CAPTURE_CHECK
-
 P13_CAPTURE_CHECK:
 	mv t3, t0
 	li t0, 1
@@ -51,7 +50,7 @@ P13_CAPTURE_CHECK_TP:
 	beq t0, s9, P13_CAPTURE_CHECK_2
 	beq t0, s10, P13_CAPTURE_CHECK_3
 	beq t0, s11, P13_CAPTURE_CHECK_4
-	li a0, 0
+	li a2, 0
 	j EXIT_CAPTURE_CHECK
 P13_CAPTURE_CHECK_1:
 	addi t0, t0, 1
@@ -59,8 +58,8 @@ P13_CAPTURE_CHECK_1:
 	li t6, 7
 P13_CAPTURE_CHECK_1_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P13_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P13_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P13_CAPTURE_CHECK_TP 
+	blt t1, s0, P13_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, P13_CAPTURE_CHECK_TP
 	beq t2, s9, BEHIND_CHECK_P13
@@ -74,8 +73,8 @@ P13_CAPTURE_CHECK_2:
 	li t6, 9
 P13_CAPTURE_CHECK_2_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P13_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P13_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P13_CAPTURE_CHECK_TP 
+	blt t1, s0, P13_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, P13_CAPTURE_CHECK_TP
 	beq t2, s9, BEHIND_CHECK_P13
@@ -89,8 +88,8 @@ P13_CAPTURE_CHECK_3:
 	li t6, -7
 P13_CAPTURE_CHECK_3_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P13_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P13_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P13_CAPTURE_CHECK_TP 
+	blt t1, s0, P13_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, P13_CAPTURE_CHECK_TP
 	beq t2, s9, BEHIND_CHECK_P13
@@ -104,8 +103,8 @@ P13_CAPTURE_CHECK_4:
 	li t6, 7
 P13_CAPTURE_CHECK_4_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P13_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P13_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P13_CAPTURE_CHECK_TP 
+	blt t1, s0, P13_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, P13_CAPTURE_CHECK_TP
 	beq t2, s9, BEHIND_CHECK_P13
@@ -113,7 +112,6 @@ P13_CAPTURE_CHECK_4_LOOP:
 	beq t2, s11, BEHIND_CHECK_P13
 	beq t3, s8, P13_CAPTURE_CHECK_TP
 	j P13_CAPTURE_CHECK_4_LOOP
-
 P24_CAPTURE_CHECK:
 	mv t3, t0
 	li t0, 1
@@ -122,7 +120,7 @@ P24_CAPTURE_CHECK_TP:
 	beq t0, s9, P24_CAPTURE_CHECK_2
 	beq t0, s10, P24_CAPTURE_CHECK_3
 	beq t0, s11, P24_CAPTURE_CHECK_4
-	li a0, 0
+	li a2, 0
 	j EXIT_CAPTURE_CHECK
 P24_CAPTURE_CHECK_1:
 	addi t0, t0, 1
@@ -130,8 +128,8 @@ P24_CAPTURE_CHECK_1:
 	li t6, 7
 P24_CAPTURE_CHECK_1_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P24_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P24_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P24_CAPTURE_CHECK_TP 
+	blt t1, s0, P24_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, BEHIND_CHECK_P24
 	beq t2, s9, P24_CAPTURE_CHECK_TP
@@ -145,8 +143,8 @@ P24_CAPTURE_CHECK_2:
 	li t6, 9
 P24_CAPTURE_CHECK_2_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P24_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P24_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P24_CAPTURE_CHECK_TP 
+	blt t1, s0, P24_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, BEHIND_CHECK_P24
 	beq t2, s9, P24_CAPTURE_CHECK_TP
@@ -160,8 +158,8 @@ P24_CAPTURE_CHECK_3:
 	li t6, -7
 P24_CAPTURE_CHECK_3_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P24_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P24_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P24_CAPTURE_CHECK_TP 
+	blt t1, s0, P24_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, BEHIND_CHECK_P24
 	beq t2, s9, P24_CAPTURE_CHECK_TP
@@ -175,8 +173,8 @@ P24_CAPTURE_CHECK_4:
 	li t6, 7
 P24_CAPTURE_CHECK_4_LOOP:
 	add t1, t1, t6
-	bgt t1, s1, P24_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t1, s0, P24_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t1, s1, P24_CAPTURE_CHECK_TP 
+	blt t1, s0, P24_CAPTURE_CHECK_TP
 	lb t2, 0(t1)
 	beq t2, s8, BEHIND_CHECK_P24
 	beq t2, s9, P24_CAPTURE_CHECK_TP
@@ -184,24 +182,22 @@ P24_CAPTURE_CHECK_4_LOOP:
 	beq t2, s11, P24_CAPTURE_CHECK_TP
 	beq t3, s9, P24_CAPTURE_CHECK_TP
 	j P24_CAPTURE_CHECK_4_LOOP
-
 BEHIND_CHECK_P13:
 	add t2, t1, t6
-	bgt t2, s1, P13_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t2, s0, P13_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t2, s1, P13_CAPTURE_CHECK_TP 
+	blt t2, s0, P13_CAPTURE_CHECK_TP
 	lb t2, 0(t2) # t2 = space behind the captured piece
 	beq t2, zero, CAPTURE_TRUE
 	j P13_CAPTURE_CHECK_TP
 BEHIND_CHECK_P24:
 	add t2, t1, t6
-	bgt t2, s1, P13_CAPTURE_CHECK_TP # if the address is bigger than the board's limit
-	blt t2, s0, P13_CAPTURE_CHECK_TP # if the address is lower than the board's limit
+	bgt t2, s1, P13_CAPTURE_CHECK_TP 
+	blt t2, s0, P13_CAPTURE_CHECK_TP
 	lb t2, 0(t2) # t2 = space behind the captured piece
 	beq t2, zero, CAPTURE_TRUE
 	j P24_CAPTURE_CHECK_TP
-
 CAPTURE_TRUE:
-	li a0, 1
+	li a2, 1
 EXIT_CAPTURE_CHECK:
 	lw ra, 0(sp)
 	lw s8, 4(sp)

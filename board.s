@@ -40,6 +40,8 @@ PLACEHOLDER:
 #  3 player queen
 #  4 cpu queen
 
+# FUNCTION THAT INITIALIZES THE BOARD AND PLAYER'S HEALTH
+
 INIT_BOARD:
 	addi sp, sp, -64
 	mv s0, sp	# initial address of board

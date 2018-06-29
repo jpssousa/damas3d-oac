@@ -18,6 +18,8 @@
 
 .text
 
+# FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME
+
 PLAY:
 	addi sp, sp, -4
 	sw ra, 0(sp)
@@ -35,8 +37,7 @@ PLAY_AGAIN:
 	# a2 = 0 (move), 1 (capture) 
 	# a3 = 1 (player 1), 2 (player 2)
 	# a4 = 0 (no capture), address (of the captured piece)
-	#jal ra, POSTPROCESSING
+	jal ra, POSTPROCESSING
 	lw ra, 0(sp)
 	addi sp, sp, 4
-	
 	ret

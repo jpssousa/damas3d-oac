@@ -28,7 +28,7 @@ void play (player_turn)
 		y = input();
 	} while (validate_move(x, y) || validate_capture(x, y));
 
-	postprocessing(x, y, need_to_eat, player_turn);
+	postprocessing(x, y, need_to_eat, player_turn, address_of_eaten_piece);
 }
 
 bool preprocessing (player_turn)

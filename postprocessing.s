@@ -22,4 +22,47 @@
 
 # memory = [s1][64 bits board][s0]
 
+# FUNCTION THAT MAKES FINAL VERIFICATIONS AND PRINTS
+
 POSTPROCESSING:
+	addi sp, sp, -8
+	sw a0, 0(sp)
+	sw ra, 4(sp)
+	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
+	jal ra, CAPTURE_CHECK
+	lw a0, 0(sp)
+	addi sp, sp, 4
+	bne a2, zero, EXIT_TO_PLAY_AGAIN
+	jal ra, PROMOTE_CHECK
+EXIT_POSTPROCESSING:
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	ret
+EXIT_TO_PLAY_AGAIN:
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	j PLAY_AGAIN
+
+# FUNCTION TO CHECK FOR PROMOTION OF PAWNS
+
+PROMOTE_CHECK:
+	sub t0, a1, s0
+	li t1, 56
+	li t2, 7
+	bge t0, t1, PROMOTE_PAWN_P1
+	ble t0, t2, PROMOTE_PAWN_P2
+	ret
+PROMOTE_PAWN_P1:
+	lb t0, 0(a1)
+	li t1, 1
+	beq t0, t1, PROMOTE_PAWN_SUCCESS
+	ret
+PROMOTE_PAWN_P2:
+	lb t0, 0(a1)
+	li t1, 2
+	beq t0, t1, PROMOTE_PAWN_SUCCESS
+	ret
+PROMOTE_PAWN_SUCCESS:
+	addi t0, t0, 2
+	sb t0, 0(a1)
+	ret

@@ -17,18 +17,30 @@
 
 .text
 
+# FUNCTION THAT IMPLEMENTS THE GAME LOOP
+
 GAME_LOOP:
-	li t0, 0
+	li s11, 0
 PLAY_LOOP:
-	addi t0, t0, 1
-	mv a3, t0
-	addi sp, sp, -4
-	sw t0, 0(sp)
+	addi s11, s11, 1
+	mv a3, s11
 	# receives a3 = 1 (player 1), 2 (player 2) as argument
 	jal ra, PLAY
-	#jal ra, LIFE_CHECK
-	lw t0, 0(sp)
-	addi sp, sp, 4
+	jal ra, LIFE_CHECK
+	jal ra, DEBUG_BOARD
 	li t1, 2
-	beq t0, t1, GAME_LOOP
+	beq s11, t1, GAME_LOOP
 	j PLAY_LOOP
+
+# FUNCTION THAT CHECKS IF THE GAME IS OVER
+
+LIFE_CHECK:
+	beq s2, zero, GAME_OVER
+	beq s3, zero, GAME_OVER
+	ret
+
+# FUNCTION GAME OVER
+
+GAME_OVER:
+	li a7, 10
+	ecall

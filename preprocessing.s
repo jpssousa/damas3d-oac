@@ -24,6 +24,8 @@
 
 .text
 
+# FUNCTION FOR PREPROCESSING THE BOARD AND SEEING IF THERE'S ANY CAPTURE
+
 PREPROCESSING:
 	addi sp, sp, -20
 	sw ra, 0(sp)
@@ -31,33 +33,25 @@ PREPROCESSING:
 	sw s9, 8(sp)
 	sw s10, 12(sp)
 	sw s11, 16(sp)
-
 	mv s8, s0 # s8 = variable board address
 	mv s9, a3 # s9 = normal token from the player
 	addi s10, s9, 2 # s10 = queen token from the player
 PREPROCESSING_LOOP:
 	bge s8, s1, EXIT_PREPROCESSING_LOOP_FALSE # if s8 >= s1 (end of board)
-	
 	lb s11, 0(s8)
 	mv a0, s8
-
 	beq s11, s9, CAPTURE_JMP
 	beq s11, s10, CAPTURE_JMP
-
 	addi s8, s8, 1
 	j PREPROCESSING_LOOP
 CAPTURE_JMP:
 	jal ra, CAPTURE_CHECK
-
-	li t0, 1
-	beq a0, t0, EXIT_PREPROCESSING_LOOP # if a0 = 1, exits without ending the loop
-
+	bne a2, zero, EXIT_PREPROCESSING_LOOP # if a2 = 1, exits without ending the loop
 	addi s8, s8, 1
 	j PREPROCESSING_LOOP
 EXIT_PREPROCESSING_LOOP_FALSE:
-	li a0, 0
+	li a2, 0
 EXIT_PREPROCESSING_LOOP:
-	mv a2, a0
 	lw ra, 0(sp)
 	lw s8, 4(sp)
 	lw s9, 8(sp)
