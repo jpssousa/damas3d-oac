@@ -54,39 +54,37 @@ EXIT_BOARD_LOOP:
 	ret
 
 # DEBUG FUNCTION TO PRINT THE BOARD
-			
+
 DEBUG_BOARD:
-	addi sp, sp, -12
-	sw t0, 0(sp)
-	sw t1, 4(sp)
-	sw t2, 8(sp)
-	addi t0, s1,-1	# address
-	li t1, 0	# counter
-	li t2, 8	# limit
+	addi t1, s1, -8
+	li t2, 0
+	li t3, 8
 LOOP_DEBUG_BOARD:
-	blt t0, s0, EXIT_DEBUG_BOARD
-	lb a0, 0(t0)
+	blt t1, s0, EXIT_DEBUG_BOARD
+	lb a0, 0(t1)
+	blt a0, zero, DEBUG_CUTE
+LOOP_DEBUG_BOARD_CONTINUE:
 	li a7, 1
 	ecall
 	la a0, ws
 	li a7, 4
 	ecall
-	addi t0, t0, -1
+	addi t2, t2, 1
 	addi t1, t1, 1
-	beq t1, t2, PRINT_NL
+	beq t2, t3, PRINT_NL
 	j LOOP_DEBUG_BOARD
 PRINT_NL:
 	la a0, nl
 	li a7, 4
 	ecall
-	li t1, 0
+	li t2, 0
+	addi t1, t1, -16
 	j LOOP_DEBUG_BOARD
 EXIT_DEBUG_BOARD:
-	sw t0, 0(sp)
-	sw t1, 4(sp)
-	sw t2, 8(sp)
-	addi sp, sp, 12
 	ret
+DEBUG_CUTE:
+	li a0, 6
+	j LOOP_DEBUG_BOARD_CONTINUE
 
 # FUNCTION THAT IMPLEMENTS THE GAME LOOP
 
