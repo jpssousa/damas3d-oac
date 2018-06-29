@@ -152,70 +152,38 @@ P13_CAPTURE_PLAY_TP:
     beq t0, s10, P13_CAPTURE_PLAY_3
     beq t0, s11, P13_CAPTURE_PLAY_4
     j CAPTURE_PLAY_FAILURE
+P13_CAPTURE_PLAY_LOOP:
+    add t1, t1, t6
+    bgt t1, s1, P13_CAPTURE_PLAY_TP 
+    blt t1, s0, P13_CAPTURE_PLAY_TP 
+    mv t4, t1
+    lb t2, 0(t1)
+    beq t2, s8, P13_CAPTURE_PLAY_TP
+    beq t2, s9, P13_BEHIND_PLAY
+    beq t2, s10, P13_CAPTURE_PLAY_TP
+    beq t2, s11, P13_BEHIND_PLAY
+    beq t3, s8, P13_CAPTURE_PLAY_TP
+    j P13_CAPTURE_PLAY_LOOP
 P13_CAPTURE_PLAY_1:
     addi t0, t0, 1
     mv t1, a0
     li t6, 7
-P13_CAPTURE_PLAY_1_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P13_CAPTURE_PLAY_TP 
-    blt t1, s0, P13_CAPTURE_PLAY_TP 
-    mv t4, t1
-    lb t2, 0(t1)
-    beq t2, s8, P13_CAPTURE_PLAY_TP
-    beq t2, s9, P13_BEHIND_PLAY
-    beq t2, s10, P13_CAPTURE_PLAY_TP
-    beq t2, s11, P13_BEHIND_PLAY
-    beq t3, s8, P13_CAPTURE_PLAY_TP
-    j P13_CAPTURE_PLAY_1_LOOP
+    j P13_CAPTURE_PLAY_LOOP
 P13_CAPTURE_PLAY_2:
     addi t0, t0, 1
     mv t1, a0
     li t6, 9
-P13_CAPTURE_PLAY_2_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P13_CAPTURE_PLAY_TP 
-    blt t1, s0, P13_CAPTURE_PLAY_TP 
-    mv t4, t1
-    lb t2, 0(t1)
-    beq t2, s8, P13_CAPTURE_PLAY_TP
-    beq t2, s9, P13_BEHIND_PLAY
-    beq t2, s10, P13_CAPTURE_PLAY_TP
-    beq t2, s11, P13_BEHIND_PLAY
-    beq t3, s8, P13_CAPTURE_PLAY_TP
-    j P13_CAPTURE_PLAY_2_LOOP
+    j P13_CAPTURE_PLAY_LOOP
 P13_CAPTURE_PLAY_3:
     addi t0, t0, 1
     mv t1, a0
     li t6, -7
-P13_CAPTURE_PLAY_3_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P13_CAPTURE_PLAY_TP 
-    blt t1, s0, P13_CAPTURE_PLAY_TP
-    mv t4, t1 
-    lb t2, 0(t1)
-    beq t2, s8, P13_CAPTURE_PLAY_TP
-    beq t2, s9, P13_BEHIND_PLAY
-    beq t2, s10, P13_CAPTURE_PLAY_TP
-    beq t2, s11, P13_BEHIND_PLAY
-    beq t3, s8, P13_CAPTURE_PLAY_TP
-    j P13_CAPTURE_PLAY_3_LOOP
+    j P13_CAPTURE_PLAY_LOOP
 P13_CAPTURE_PLAY_4:
     addi t0, t0, 1
     mv t1, a0
     li t6, -9
-P13_CAPTURE_PLAY_4_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P13_CAPTURE_PLAY_TP 
-    blt t1, s0, P13_CAPTURE_PLAY_TP 
-    mv t4, t1
-    lb t2, 0(t1)
-    beq t2, s8, P13_CAPTURE_PLAY_TP
-    beq t2, s9, P13_BEHIND_PLAY
-    beq t2, s10, P13_CAPTURE_PLAY_TP
-    beq t2, s11, P13_BEHIND_PLAY
-    beq t3, s8, P13_CAPTURE_PLAY_TP
-    j P13_CAPTURE_PLAY_4_LOOP
+    j P13_CAPTURE_PLAY_LOOP
 P24_CAPTURE_PLAY:
     mv t3, t0
     li t0, 1
@@ -225,70 +193,38 @@ P24_CAPTURE_PLAY_TP:
     beq t0, s10, P24_CAPTURE_PLAY_3
     beq t0, s11, P24_CAPTURE_PLAY_4
     j CAPTURE_PLAY_FAILURE
+P24_CAPTURE_PLAY_LOOP:
+    add t1, t1, t6
+    bgt t1, s1, P24_CAPTURE_PLAY_TP 
+    blt t1, s0, P24_CAPTURE_PLAY_TP 
+    mv t4, t1
+    lb t2, 0(t1)
+    beq t2, s8, P24_BEHIND_PLAY
+    beq t2, s9, P24_CAPTURE_PLAY_TP
+    beq t2, s10, P24_BEHIND_PLAY
+    beq t2, s11, P24_CAPTURE_PLAY_TP
+    beq t3, s9, P24_CAPTURE_PLAY_TP
+    j P24_CAPTURE_PLAY_LOOP
 P24_CAPTURE_PLAY_1:
     addi t0, t0, 1
     mv t1, a0
     li t6, 7
-P24_CAPTURE_PLAY_1_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P24_CAPTURE_PLAY_TP 
-    blt t1, s0, P24_CAPTURE_PLAY_TP 
-    mv t4, t1
-    lb t2, 0(t1)
-    beq t2, s8, P24_BEHIND_PLAY
-    beq t2, s9, P24_CAPTURE_PLAY_TP
-    beq t2, s10, P24_BEHIND_PLAY
-    beq t2, s11, P24_CAPTURE_PLAY_TP
-    beq t3, s9, P24_CAPTURE_PLAY_TP
-    j P24_CAPTURE_PLAY_1_LOOP
+    j P24_CAPTURE_PLAY_LOOP
 P24_CAPTURE_PLAY_2:
     addi t0, t0, 1
     mv t1, a0
     li t6, 9
-P24_CAPTURE_PLAY_2_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P24_CAPTURE_PLAY_TP 
-    blt t1, s0, P24_CAPTURE_PLAY_TP 
-    mv t4, t1
-    lb t2, 0(t1)
-    beq t2, s8, P24_BEHIND_PLAY
-    beq t2, s9, P24_CAPTURE_PLAY_TP
-    beq t2, s10, P24_BEHIND_PLAY
-    beq t2, s11, P24_CAPTURE_PLAY_TP
-    beq t3, s9, P24_CAPTURE_PLAY_TP
-    j P24_CAPTURE_PLAY_2_LOOP
+    j P24_CAPTURE_PLAY_LOOP
 P24_CAPTURE_PLAY_3:
     addi t0, t0, 1
     mv t1, a0
     li t6, -7
-P24_CAPTURE_PLAY_3_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P24_CAPTURE_PLAY_TP 
-    blt t1, s0, P24_CAPTURE_PLAY_TP
-    mv t4, t1 
-    lb t2, 0(t1)
-    beq t2, s8, P24_BEHIND_PLAY
-    beq t2, s9, P24_CAPTURE_PLAY_TP
-    beq t2, s10, P24_BEHIND_PLAY
-    beq t2, s11, P24_CAPTURE_PLAY_TP
-    beq t3, s9, P24_CAPTURE_PLAY_TP
-    j P24_CAPTURE_PLAY_3_LOOP
+    j P24_CAPTURE_PLAY_LOOP
 P24_CAPTURE_PLAY_4:
     addi t0, t0, 1
     mv t1, a0
     li t6, -9
-P24_CAPTURE_PLAY_4_LOOP:
-    add t1, t1, t6
-    bgt t1, s1, P24_CAPTURE_PLAY_TP 
-    blt t1, s0, P24_CAPTURE_PLAY_TP 
-    mv t4, t1
-    lb t2, 0(t1)
-    beq t2, s8, P24_BEHIND_PLAY
-    beq t2, s9, P24_CAPTURE_PLAY_TP
-    beq t2, s10, P24_BEHIND_PLAY
-    beq t2, s11, P24_CAPTURE_PLAY_TP
-    beq t3, s9, P24_CAPTURE_PLAY_TP
-    j P24_CAPTURE_PLAY_4_LOOP
+    j P24_CAPTURE_PLAY_LOOP
 P13_BEHIND_PLAY:
     add t1, t1, t6
     bgt t1, s1, P13_CAPTURE_PLAY_TP
@@ -297,7 +233,7 @@ P13_BEHIND_PLAY:
     lb t2, 0(t1)
     bne t2, zero, P13_CAPTURE_PLAY_TP
     beq t3, s8, P13_CAPTURE_PLAY_TP
-    P13_BEHIND_PLAY
+    j P13_BEHIND_PLAY
 P24_BEHIND_PLAY:
     add t1, t1, t6
     bgt t1, s1, P24_CAPTURE_PLAY_TP
@@ -368,50 +304,34 @@ MOVEMENT_PLAY_P34_TP:
     beq t0, s10, MOVEMENT_PLAY_P34_CHECK_3
     beq t0, s11, MOVEMENT_PLAY_P34_CHECK_4
     j MOVEMENT_PLAY_FAILURE
+MOVEMENT_PLAY_P34_CHECK_LOOP:
+    addi t2, t2, t3
+    beq t2, a1, MOVEMENT_SUCCESS
+    bgt t2, s1, MOVEMENT_PLAY_P34_TP 
+    blt t2, s0, MOVEMENT_PLAY_P34_TP 
+    lb t3, 0(t2)
+    bne t3, zero, MOVEMENT_PLAY_P34_TP
+    j MOVEMENT_PLAY_P34_CHECK_LOOP
 MOVEMENT_PLAY_P34_CHECK_1:
     addi t0, t0, 1
     mv t2, a0
-MOVEMENT_PLAY_P34_CHECK_1_LOOP:
-    addi t2, t2, 7
-    beq t2, a1, MOVEMENT_SUCCESS
-    bgt t2, s1, MOVEMENT_PLAY_P34_TP 
-    blt t2, s0, MOVEMENT_PLAY_P34_TP 
-    lb t3, 0(t2)
-    bne t3, zero, MOVEMENT_PLAY_P34_TP
-    j MOVEMENT_PLAY_P34_CHECK_1_LOOP
+    li t3, 7
+    j MOVEMENT_PLAY_P34_CHECK_LOOP
 MOVEMENT_PLAY_P34_CHECK_2:
     addi t0, t0, 1
     mv t2, a0
-MOVEMENT_PLAY_P34_CHECK_2_LOOP:
-    addi t2, t2, 9
-    beq t2, a1, MOVEMENT_SUCCESS
-    bgt t2, s1, MOVEMENT_PLAY_P34_TP 
-    blt t2, s0, MOVEMENT_PLAY_P34_TP 
-    lb t3, 0(t2)
-    bne t3, zero, MOVEMENT_PLAY_P34_TP
-    j MOVEMENT_PLAY_P34_CHECK_2_LOOP
+    li t3, 9
+    j MOVEMENT_PLAY_P34_CHECK_LOOP
 MOVEMENT_PLAY_P34_CHECK_3:
     addi t0, t0, 1
     mv t2, a0
-MOVEMENT_PLAY_P34_CHECK_3_LOOP:
-    addi t2, t2, -7
-    beq t2, a1, MOVEMENT_SUCCESS
-    bgt t2, s1, MOVEMENT_PLAY_P34_TP 
-    blt t2, s0, MOVEMENT_PLAY_P34_TP 
-    lb t3, 0(t2)
-    bne t3, zero, MOVEMENT_PLAY_P34_TP
-    j MOVEMENT_PLAY_P34_CHECK_3_LOOP
+    li t3, -7
+    j MOVEMENT_PLAY_P34_CHECK_LOOP
 MOVEMENT_PLAY_P34_CHECK_4:
     addi t0, t0, 1
     mv t2, a0
-MOVEMENT_PLAY_P34_CHECK_4_LOOP:
-    addi t2, t2, -9
-    beq t2, a1, MOVEMENT_SUCCESS
-    bgt t2, s1, MOVEMENT_PLAY_P34_TP 
-    blt t2, s0, MOVEMENT_PLAY_P34_TP 
-    lb t3, 0(t2)
-    bne t3, zero, MOVEMENT_PLAY_P34_TP
-    j MOVEMENT_PLAY_P34_CHECK_4_LOOP
+    li t3, -9
+    j MOVEMENT_PLAY_P34_CHECK_LOOP
 MOVEMENT_SUCCESS:
     lb t0, 0(a0)
     lb t1, 0(a1)
