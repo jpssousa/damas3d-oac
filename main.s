@@ -6,9 +6,9 @@
 	              1, -1, 1, -1, 1, -1, 1, -1,
 	              -1, 0, -1, 0, -1, 0, -1, 0,
 	              0, -1, 0, -1, 0, -1, 0, -1,
-	              -1, 2, -1, 2, -1, 2, -1, 2,
-	              2, -1, 2, -1, 2, -1, 2, -1,
-	              -1, 2, -1, 2, -1, 2, -1, 2
+	              -1, 2, -1, 2, -1, 0, -1, 2,
+	              2, -1, 2, -1, 2, -1, 1, -1,
+	              -1, 2, -1, 2, -1, 2, -1, 0
 	
 	ws: .string " "
 	nl: .string "\n"
@@ -56,6 +56,8 @@ EXIT_BOARD_LOOP:
 # DEBUG FUNCTION TO PRINT THE BOARD
 
 DEBUG_BOARD:
+	addi sp, sp, -4
+	sw a0, 0(sp)
 	addi t1, s1, -8
 	li t2, 0
 	li t3, 8
@@ -81,6 +83,8 @@ PRINT_NL:
 	addi t1, t1, -16
 	j LOOP_DEBUG_BOARD
 EXIT_DEBUG_BOARD:
+	lw a0, 0(sp)
+	addi sp, sp, 4
 	ret
 DEBUG_CUTE:
 	li a0, 6
