@@ -617,7 +617,7 @@ P13_BEHIND_PLAY:
     beq t1, a1, CAPTURE_PLAY_SUCCESS
     lb t2, 0(t1)
     bne t2, zero, P13_CAPTURE_PLAY_TP
-    beq t3, s8, CAPTURE_PLAY_FAILURE
+    beq t3, s8, P13_CAPTURE_PLAY_TP
     j P13_BEHIND_PLAY
 P24_BEHIND_PLAY:
     add t1, t1, t6
