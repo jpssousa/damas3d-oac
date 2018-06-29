@@ -3,10 +3,10 @@
 .data
 	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
 	              -1, 1, -1, 1, -1, 1, -1, 1,
-	              3, -1, 1, -1, 1, -1, 1, -1,
+	              1, -1, 1, -1, 1, -1, 1, -1,
 	              -1, 0, -1, 0, -1, 0, -1, 0,
 	              0, -1, 0, -1, 0, -1, 0, -1,
-	              -1, 2, -1, 2, -1, 4, -1, 2,
+	              -1, 2, -1, 2, -1, 2, -1, 2,
 	              2, -1, 2, -1, 2, -1, 2, -1,
 	              -1, 2, -1, 2, -1, 2, -1, 2
 	
@@ -253,7 +253,7 @@ P13_CAPTURE_CHECK_3_LOOP:
 P13_CAPTURE_CHECK_4:
 	addi t0, t0, 1
 	mv t1, a0
-	li t6, 7
+	li t6, -9
 P13_CAPTURE_CHECK_4_LOOP:
 	add t1, t1, t6
 	bgt t1, s1, P13_CAPTURE_CHECK_TP 
@@ -323,7 +323,7 @@ P24_CAPTURE_CHECK_3_LOOP:
 P24_CAPTURE_CHECK_4:
 	addi t0, t0, 1
 	mv t1, a0
-	li t6, 7
+	li t6, -9
 P24_CAPTURE_CHECK_4_LOOP:
 	add t1, t1, t6
 	bgt t1, s1, P24_CAPTURE_CHECK_TP 
