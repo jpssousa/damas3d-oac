@@ -41,6 +41,7 @@ EXIT_POSTPROCESSING:
 EXIT_TO_PLAY_AGAIN:
 	lw ra, 0(sp)
 	addi sp, sp, 4
+	jal, ra, DEBUG_BOARD
 	j PLAY_AGAIN
 POSTPROCESSING_CAPTURE_CHECK:
 	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin

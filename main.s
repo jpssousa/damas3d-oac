@@ -1,14 +1,14 @@
 # TESTING CAPTURE CHECK
 
 .data
-	board0: .byte 1, -1, 1, -1, 0, -1, 1, -1,
-	              -1, 1, -1, 0, -1, 1, -1, 1,
-	              0, -1, 1, -1, 2, -1, 1, -1,
-	              -1, 1, -1, 0, -1, 0, -1, 0,
+	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
+	              -1, 1, -1, 1, -1, 1, -1, 1,
+	              1, -1, 1, -1, 1, -1, 1, -1,
+	              -1, 0, -1, 0, -1, 0, -1, 0,
 	              0, -1, 0, -1, 0, -1, 0, -1,
-	              -1 ,2 ,-1, 2, -1, 0, -1, 0,
-	              2, -1, 2, -1, 0, -1, 2, -1,
-	              -1, 2, -1, 3, -1, 2, -1, 2                                     
+	              -1 ,2 ,-1, 2, -1, 2, -1, 2,
+	              2, -1, 2, -1, 2, -1, 2, -1,
+	              -1, 2, -1, 2, -1, 2, -1, 2                                     
 	
 	ws: .string " "
 	nl: .string "\n"
@@ -708,6 +708,7 @@ EXIT_POSTPROCESSING:
 EXIT_TO_PLAY_AGAIN:
 	lw ra, 0(sp)
 	addi sp, sp, 4
+	jal, ra, DEBUG_BOARD
 	j PLAY_AGAIN
 POSTPROCESSING_CAPTURE_CHECK:
 	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
