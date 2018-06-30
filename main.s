@@ -1,14 +1,14 @@
 # TESTING CAPTURE CHECK
 
 .data
-	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
-	              -1, 1, -1, 1, -1, 1, -1, 1,
-	              1, -1, 1, -1, 1, -1, 1, -1,
-	              -1, 0, -1, 0, -1, 0, -1, 0,
+	board0: .byte 1, -1, 1, -1, 0, -1, 1, -1,
+	              -1, 1, -1, 0, -1, 1, -1, 1,
+	              0, -1, 1, -1, 2, -1, 1, -1,
+	              -1, 1, -1, 0, -1, 0, -1, 0,
 	              0, -1, 0, -1, 0, -1, 0, -1,
-	              -1, 2, -1, 2, -1, 2, -1, 2,
-	              2, -1, 2, -1, 2, -1, 2, -1,
-	              -1, 2, -1, 2, -1, 2, -1, 2
+	              -1 ,2 ,-1, 2, -1, 0, -1, 0,
+	              2, -1, 2, -1, 0, -1, 2, -1,
+	              -1, 2, -1, 3, -1, 2, -1, 2                                     
 	
 	ws: .string " "
 	nl: .string "\n"
@@ -18,6 +18,7 @@
 
 MAIN:
 	jal ra, INIT_BOARD
+	jal ra, DEBUG_BOARD
 	jal ra, GAME_LOOP
 	li a7, 10
 	ecall
@@ -288,8 +289,8 @@ BEHIND_CHECK_P13:
 	j P13_CAPTURE_CHECK_TP
 BEHIND_CHECK_P24:
 	add t2, t1, t6
-	bgt t2, s1, P13_CAPTURE_CHECK_TP 
-	blt t2, s0, P13_CAPTURE_CHECK_TP
+	bgt t2, s1, P24_CAPTURE_CHECK_TP 
+	blt t2, s0, P24_CAPTURE_CHECK_TP
 	lb t2, 0(t2) # t2 = space behind the captured piece
 	beq t2, zero, CAPTURE_TRUE
 	j P24_CAPTURE_CHECK_TP

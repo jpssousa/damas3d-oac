@@ -133,8 +133,8 @@ BEHIND_CHECK_P13:
 	j P13_CAPTURE_CHECK_TP
 BEHIND_CHECK_P24:
 	add t2, t1, t6
-	bgt t2, s1, P13_CAPTURE_CHECK_TP 
-	blt t2, s0, P13_CAPTURE_CHECK_TP
+	bgt t2, s1, P24_CAPTURE_CHECK_TP 
+	blt t2, s0, P24_CAPTURE_CHECK_TP
 	lb t2, 0(t2) # t2 = space behind the captured piece
 	beq t2, zero, CAPTURE_TRUE
 	j P24_CAPTURE_CHECK_TP
