@@ -309,8 +309,8 @@ MOVEMENT_PLAY_P34_CHECK_LOOP:
     beq t2, a1, MOVEMENT_SUCCESS
     bgt t2, s1, MOVEMENT_PLAY_P34_TP 
     blt t2, s0, MOVEMENT_PLAY_P34_TP 
-    lb t3, 0(t2)
-    bne t3, zero, MOVEMENT_PLAY_P34_TP
+    lb t4, 0(t2)
+    bne t4, zero, MOVEMENT_PLAY_P34_TP
     j MOVEMENT_PLAY_P34_CHECK_LOOP
 MOVEMENT_PLAY_P34_CHECK_1:
     addi t0, t0, 1

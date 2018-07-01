@@ -20,6 +20,8 @@
 # FUNCTION THAT IMPLEMENTS THE GAME LOOP
 
 GAME_LOOP:
+	addi sp, sp, -4
+	sw s11, 0(sp)
 	li s11, 0
 PLAY_LOOP:
 	addi s11, s11, 1
@@ -42,5 +44,7 @@ LIFE_CHECK:
 # FUNCTION GAME OVER
 
 GAME_OVER:
+	lw s11, 0(sp)
+	addi sp, sp, 4
 	li a7, 10
 	ecall
