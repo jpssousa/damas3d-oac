@@ -8,6 +8,9 @@
 # a3 = 1 (player 1), 2 (player 2)
 
 # Returns:
+# if capture: a0 = origin
+# if capture: a1 = destination
+# if capture: a4 = address of piece captured
 # a2 = 0 (move), 1 (capture)
 # a3 = 1 (player 1), 2 (player 2)
 

@@ -17,6 +17,9 @@
 # a0 = address of the piece on the board (s0+offset)
 
 # returns
+# if capture: a0 = origin
+# if capture: a1 = destination
+# if capture: a4 = address of piece captured
 # a2 = 0 (move), 1 (capture)
 
 .data
@@ -128,18 +131,20 @@ BEHIND_CHECK_P13:
 	add t2, t1, t6
 	bgt t2, s1, P13_CAPTURE_CHECK_TP 
 	blt t2, s0, P13_CAPTURE_CHECK_TP
-	lb t2, 0(t2) # t2 = space behind the captured piece
-	beq t2, zero, CAPTURE_TRUE
+	lb t4, 0(t2) # t2 = space behind the captured piece
+	beq t4, zero, CAPTURE_TRUE
 	j P13_CAPTURE_CHECK_TP
 BEHIND_CHECK_P24:
 	add t2, t1, t6
 	bgt t2, s1, P24_CAPTURE_CHECK_TP 
 	blt t2, s0, P24_CAPTURE_CHECK_TP
-	lb t2, 0(t2) # t2 = space behind the captured piece
-	beq t2, zero, CAPTURE_TRUE
+	lb t4, 0(t2) # t2 = space behind the captured piece
+	beq t4, zero, CAPTURE_TRUE
 	j P24_CAPTURE_CHECK_TP
 CAPTURE_TRUE:
 	li a2, 1
+	mv a1, t2
+	mv a4, t1
 EXIT_CAPTURE_CHECK:
 	lw ra, 0(sp)
 	lw s8, 4(sp)

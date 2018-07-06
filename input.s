@@ -13,6 +13,7 @@
 # Receives as arguments:
 # a2 = 0 (move), 1 (capture)
 # a3 = 1 (player 1), 2 (player 2)
+# a5 = 1 (playing again), 0 (normal play)
 
 # Returns:
 # a0 = origin
@@ -47,8 +48,10 @@ PLACEHOLDER2:
 INPUT:
     addi sp, sp, -4
     sw ra, 0(sp)
+    bne a5, zero, INPUT_PLAY_AGAIN
     jal ra, PLAYER_INPUT
     jal ra, DEBUG_INPUT
+INPUT_PLAY_AGAIN:
     addi sp, sp, -4
     sw a0, 0(sp) # a7 = temporary origin
     jal ra, PLAYER_INPUT
@@ -118,9 +121,11 @@ BASIC_POSTPROCESSING_4_VERIFY_2:
     addi s2, s2, -1
     ret
 BASIC_POSTPROCESSING_FAILURE:
+    mv t0, a0 # to help print
     la a0, error
     li a7, 4
     ecall
+    mv a0, t0 # to help print
     lw ra, 0(sp)
     addi sp, sp, 4 # getting ra and memory back from INPUT
     j INPUT
@@ -305,7 +310,7 @@ MOVEMENT_PLAY_P34_TP:
     beq t0, s11, MOVEMENT_PLAY_P34_CHECK_4
     j MOVEMENT_PLAY_FAILURE
 MOVEMENT_PLAY_P34_CHECK_LOOP:
-    addi t2, t2, t3
+    add t2, t2, t3
     beq t2, a1, MOVEMENT_SUCCESS
     bgt t2, s1, MOVEMENT_PLAY_P34_TP 
     blt t2, s0, MOVEMENT_PLAY_P34_TP 
