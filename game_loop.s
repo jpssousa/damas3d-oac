@@ -6,22 +6,21 @@
 # s1 is the final address of the board   #
 # s2 is the number of cpu tokens         #
 # s3 is the number of player tokens      #
+# s11 is the counter for game_loop       #
 ##########################################
 
 # memory = [s1][64 bits board][s0][99 bits destinations][1 bit number of destinations][s2]
 
-# Passes as argument to PLAY:
+# Passes as argument:
 # a3 = 1 (player 1), 2 (player 2)
 
 .data
 
 .text
 
-# FUNCTION THAT IMPLEMENTS THE GAME LOOP
+# FUNCTION THAT IMPLEMENTS THE GAME LOOP PVP
 
 GAME_LOOP:
-	addi sp, sp, -4
-	sw s11, 0(sp)
 	li s11, 0
 PLAY_LOOP:
 	addi s11, s11, 1
@@ -34,6 +33,23 @@ PLAY_LOOP:
 	beq s11, t1, GAME_LOOP
 	j PLAY_LOOP
 
+# FUNCTION THAT IMPLEMENTS THE GAME LOOP PVE
+
+GAME_LOOP_2:
+	li s11, 1
+	mv a3, s11
+	# receives a3 = 1 (player 1), 2 (player 2) as argument
+	jal ra, PLAY
+	jal ra, LIFE_CHECK
+	jal ra, DEBUG_BOARD
+	addi s11, s11, 1
+	mv a3, s11
+	# receives a3 = 1 (player 1), 2 (player 2) as argument
+	jal ra, PLAY_CPU
+	jal ra, LIFE_CHECK
+	jal ra, DEBUG_BOARD
+	j GAME_LOOP_2
+
 # FUNCTION THAT CHECKS IF THE GAME IS OVER
 
 LIFE_CHECK:
@@ -44,7 +60,5 @@ LIFE_CHECK:
 # FUNCTION GAME OVER
 
 GAME_OVER:
-	lw s11, 0(sp)
-	addi sp, sp, 4
 	li a7, 10
 	ecall

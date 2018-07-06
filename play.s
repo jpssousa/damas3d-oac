@@ -18,26 +18,50 @@
 
 .text
 
-# FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME
+# FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME 
 
 PLAY:
 	addi sp, sp, -4
 	sw ra, 0(sp)
-	# arguments 
+	# arguments:
 	# a3 = 1 (player 1), 2 (player 2)
 	jal ra, PREPROCESSING
-	# arguments 
-	# a2 = 0 (move), 1 (capture)
+	# arguments:
 	# a3 = 1 (player 1), 2 (player 2)
+	# a4 = 0 (no capture), address (of captured piece)
 PLAY_AGAIN:
 	jal ra, INPUT
-	# arguments
+	# arguments:
 	# a0 = origin, 
 	# a1 = destination, 
-	# a2 = 0 (move), 1 (capture) 
 	# a3 = 1 (player 1), 2 (player 2)
 	# a4 = 0 (no capture), address (of the captured piece)
 	jal ra, POSTPROCESSING
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	ret
+
+# FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME FOR THE CPU
+
+PLAY_CPU:
+	addi sp, sp, -4
+	sw ra, 0(sp)
+	# arguments:
+	# a3 = 1 (player 1), 2 (player 2)
+	jal ra, PREPROCESSING
+	# arguments:
+	# if capture: a0 = origin
+	# if capture: a1 = destination
+	# a3 = 1 (player 1), 2 (player 2)
+	# if capture: a4 = address of piece captured
+PLAY_AGAIN_CPU:
+	jal ra, INPUT_CPU
+	# arguments:
+	# a0 = origin, 
+	# a1 = destination, 
+	# a3 = 1 (player 1), 2 (player 2)
+	# a4 = 0 (no capture), address (of the captured piece)
+	jal ra, POSTPROCESSING_CPU
 	lw ra, 0(sp)
 	addi sp, sp, 4
 	ret

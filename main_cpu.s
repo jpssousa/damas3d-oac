@@ -1,46 +1,336 @@
-# File that deals with player's play and input
- 
-##########################################
-# s0 is the initial address of the board #
-# s1 is the final address of the board   #
-# s2 is the number of cpu tokens         #
-# s3 is the number of player tokens      #
-# s11 is the counter for game_loop       #
-##########################################
-
-# PLAYER_INPUT
-# Returns: a0 = address on the board (origin or destination)
-
-# Receives as arguments:
-# a4 = 0 (move), 1 (capture)
-# a3 = 1 (player 1), 2 (player 2)
-# a4 = 0 (no capture), address (of the captured piece)
-# a5 = 1 (playing again), 0 (normal play)
-
-# Returns:
-# a0 = origin
-# a1 = destination
-# a3 = 1 (player 1), 2 (player 2)
-# a4 = 0 (no capture), address (of the captured piece)
-
-# memory = [s1][64 bits board][s0]
- 
-# KEYBOARD MMIO ADDRESS: 0xFF200000
- 
 .data
- 
-    msg: .string "A peca no tabuleiro vale: "
-    error: .string "Houve um erro. Tente Novamente.\n"
- 
+
+	board0: .byte 1, -1, 1, -1, 1, -1, 1, -1,
+	              -1, 0, -1, 0, -1, 0, -1, 1,
+	              1, -1, 1, -1, 1, -1, 1, -1,
+	              -1, 0, -1, 0, -1, 0, -1, 0,
+	              0, -1, 1, -1, 0, -1, 0, -1,
+	              -1 ,2 ,-1, 2, -1, 2, -1, 2,
+	              2, -1, 2, -1, 2, -1, 2, -1,
+	              -1, 2, -1, 2, -1, 2, -1, 2                                     
+	
+	ws: .string " "
+	nl: .string "\n"
+	msg: .string "A peca no tabuleiro vale: "
+	error: .string "Houve um erro. Tente Novamente.\n"
+
 .text
- 
-# PLACEHOLDER FUNCTION TO CALL THE INPUT FUNCTION
- 
-PLACEHOLDER2:
-    li s0, 0
-    jal ra, PLAYER_INPUT
-    jal ra, DEBUG_INPUT
- 
+
+# MAIN FUNCTION
+
+MAIN:
+	jal ra, INIT_BOARD
+	jal ra, DEBUG_BOARD
+	jal ra, GAME_LOOP_2
+
+# FUNCTION THAT INITIALIZES THE BOARD AND PLAYER'S HEALTH
+
+INIT_BOARD:
+	addi sp, sp, -64
+	mv s0, sp	# initial address of board
+	addi s1, s0, 64 # final address of board
+	addi sp, sp, -16
+	sw ra, 0(sp)
+	sw t0, 4(sp)
+	sw t1, 8(sp)
+	sw t2, 12(sp)
+BOARD_INPUT:
+	add t0, s0, zero # temporary address of stack
+	la t1, board0
+BOARD_LOOP:
+	bge t0, s1, EXIT_BOARD_LOOP # if address of stack == final address of board, end loop
+	lb t2, 0(t1)
+	sb t2, 0(t0)
+	addi t0, t0, 1
+	addi t1, t1, 1
+	j BOARD_LOOP
+EXIT_BOARD_LOOP:
+	lw ra, 0(sp)
+	lw t0, 4(sp)
+	lw t1, 8(sp)
+	lw t2, 12(sp)
+	addi sp, sp, 16
+	li s2, 12 # s2 = player tokens
+	li s3, 12 # s3 = cpu tokens
+	ret
+			
+# DEBUG FUNCTION TO PRINT THE BOARD
+
+DEBUG_BOARD:
+	addi sp, sp, -4
+	sw a0, 0(sp)
+	addi t1, s1, -8
+	li t2, 0
+	li t3, 8
+LOOP_DEBUG_BOARD:
+	blt t1, s0, EXIT_DEBUG_BOARD
+	lb a0, 0(t1)
+	blt a0, zero, DEBUG_CUTE
+LOOP_DEBUG_BOARD_CONTINUE:
+	li a7, 1
+	ecall
+	la a0, ws
+	li a7, 4
+	ecall
+	addi t2, t2, 1
+	addi t1, t1, 1
+	beq t2, t3, PRINT_NL
+	j LOOP_DEBUG_BOARD
+PRINT_NL:
+	la a0, nl
+	li a7, 4
+	ecall
+	li t2, 0
+	addi t1, t1, -16
+	j LOOP_DEBUG_BOARD
+EXIT_DEBUG_BOARD:
+	lw a0, 0(sp)
+	addi sp, sp, 4
+	ret
+DEBUG_CUTE:
+	li a0, 6
+	j LOOP_DEBUG_BOARD_CONTINUE
+
+# FUNCTION THAT IMPLEMENTS THE GAME LOOP PVE
+
+GAME_LOOP_2:
+	li s11, 1
+	mv a3, s11
+	# receives a3 = 1 (player 1), 2 (player 2) as argument
+	jal ra, PLAY
+	jal ra, LIFE_CHECK
+	jal ra, DEBUG_BOARD
+	addi s11, s11, 1
+	mv a3, s11
+	# receives a3 = 1 (player 1), 2 (player 2) as argument
+	jal ra, PLAY_CPU
+	jal ra, LIFE_CHECK
+	jal ra, DEBUG_BOARD
+	j GAME_LOOP_2
+
+# FUNCTION THAT CHECKS IF THE GAME IS OVER
+
+LIFE_CHECK:
+	beq s2, zero, GAME_OVER
+	beq s3, zero, GAME_OVER
+	ret
+
+# FUNCTION GAME OVER
+
+GAME_OVER:
+	li a7, 10
+	ecall
+
+# FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME
+
+PLAY:
+	addi sp, sp, -4
+	sw ra, 0(sp)
+	# arguments 
+	# a3 = 1 (player 1), 2 (player 2)
+	jal ra, PREPROCESSING
+	# arguments 
+	# a2 = 0 (move), 1 (capture)
+	# a3 = 1 (player 1), 2 (player 2)
+PLAY_AGAIN:
+	jal ra, INPUT
+	# arguments
+	# a0 = origin, 
+	# a1 = destination, 
+	# a2 = 0 (move), 1 (capture) 
+	# a3 = 1 (player 1), 2 (player 2)
+	# a4 = 0 (no capture), address (of the captured piece)
+	jal ra, POSTPROCESSING
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	ret
+
+# FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME FOR THE CPU
+
+PLAY_CPU:
+	addi sp, sp, -4
+	sw ra, 0(sp)
+	# arguments:
+	# a3 = 1 (player 1), 2 (player 2)
+	jal ra, PREPROCESSING
+	# arguments:
+	# if capture: a0 = origin
+	# if capture: a1 = destination
+	# a3 = 1 (player 1), 2 (player 2)
+	# if capture: a4 = address of piece captured
+PLAY_AGAIN_CPU:
+	jal ra, INPUT_CPU
+	# arguments:
+	# a0 = origin, 
+	# a1 = destination, 
+	# a3 = 1 (player 1), 2 (player 2)
+	# a4 = 0 (no capture), address (of the captured piece)
+	jal ra, POSTPROCESSING_CPU
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	ret
+
+# FUNCTION FOR PREPROCESSING THE BOARD AND SEEING IF THERE'S ANY CAPTURE
+
+PREPROCESSING:
+	addi sp, sp, -20
+	sw ra, 0(sp)
+	sw s8, 4(sp)
+	sw s9, 8(sp)
+	sw s10, 12(sp)
+	sw s11, 16(sp)
+	mv s8, s0 # s8 = variable board address
+	mv s9, a3 # s9 = normal token from the player
+	addi s10, s9, 2 # s10 = queen token from the player
+PREPROCESSING_LOOP:
+	bge s8, s1, EXIT_PREPROCESSING_LOOP # if s8 >= s1 (end of board)
+	lb s11, 0(s8)
+	mv a0, s8
+	beq s11, s9, CAPTURE_JMP
+	beq s11, s10, CAPTURE_JMP
+	addi s8, s8, 1
+	j PREPROCESSING_LOOP
+CAPTURE_JMP:
+	jal ra, CAPTURE_CHECK
+	bne a4, zero, EXIT_PREPROCESSING_LOOP 
+	addi s8, s8, 1
+	j PREPROCESSING_LOOP
+EXIT_PREPROCESSING_LOOP:
+	lw ra, 0(sp)
+	lw s8, 4(sp)
+	lw s9, 8(sp)
+	lw s10, 12(sp)
+	lw s11, 16(sp)
+	addi sp, sp, 20
+	ret
+
+# FUNCTION THAT CHECKS IF A PIECE CAN CAPTURE
+
+CAPTURE_CHECK:
+	addi sp, sp, -20,
+	sw ra, 0(sp)
+	sw s8, 4(sp)
+	sw s9, 8(sp)
+	sw s10, 12(sp)
+	sw s11, 16(sp)
+	li s8, 1 # p1
+	li s9, 2 # p2
+	li s10, 3 # queen p1
+	li s11, 4 # queen p2
+	lb t0, 0(a0) # t0 = type of the piece (1,3 (p1) or 2,4 (p2))
+	beq t0, s8, P13_CAPTURE_CHECK
+	beq t0, s9, P24_CAPTURE_CHECK
+	beq t0, s10, P13_CAPTURE_CHECK
+	beq t0, s11, P24_CAPTURE_CHECK
+	j EXIT_CAPTURE_CHECK
+P13_CAPTURE_CHECK:
+	mv t3, t0
+	li t0, 1
+P13_CAPTURE_CHECK_TP:
+	beq t0, s8, P13_CAPTURE_CHECK_1
+	beq t0, s9, P13_CAPTURE_CHECK_2
+	beq t0, s10, P13_CAPTURE_CHECK_3
+	beq t0, s11, P13_CAPTURE_CHECK_4
+	mv a4, zero
+	j EXIT_CAPTURE_CHECK
+P13_CAPTURE_CHECK_LOOP:
+	add t1, t1, t6
+	bgt t1, s1, P13_CAPTURE_CHECK_TP 
+	blt t1, s0, P13_CAPTURE_CHECK_TP
+	lb t2, 0(t1)
+	beq t2, s8, P13_CAPTURE_CHECK_TP
+	beq t2, s9, BEHIND_CHECK_P13
+	beq t2, s10, P13_CAPTURE_CHECK_TP
+	beq t2, s11, BEHIND_CHECK_P13
+	beq t3, s8, P13_CAPTURE_CHECK_TP
+	j P13_CAPTURE_CHECK_LOOP
+P13_CAPTURE_CHECK_1:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, 7
+	j P13_CAPTURE_CHECK_LOOP
+P13_CAPTURE_CHECK_2:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, 9
+	j P13_CAPTURE_CHECK_LOOP
+P13_CAPTURE_CHECK_3:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, -7
+	j P13_CAPTURE_CHECK_LOOP
+P13_CAPTURE_CHECK_4:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, -9
+	j P13_CAPTURE_CHECK_LOOP
+P24_CAPTURE_CHECK:
+	mv t3, t0
+	li t0, 1
+P24_CAPTURE_CHECK_TP:
+	beq t0, s8, P24_CAPTURE_CHECK_1
+	beq t0, s9, P24_CAPTURE_CHECK_2
+	beq t0, s10, P24_CAPTURE_CHECK_3
+	beq t0, s11, P24_CAPTURE_CHECK_4
+	mv a4, zero
+	j EXIT_CAPTURE_CHECK
+P24_CAPTURE_CHECK_LOOP:
+	add t1, t1, t6
+	bgt t1, s1, P24_CAPTURE_CHECK_TP 
+	blt t1, s0, P24_CAPTURE_CHECK_TP
+	lb t2, 0(t1)
+	beq t2, s8, BEHIND_CHECK_P24
+	beq t2, s9, P24_CAPTURE_CHECK_TP
+	beq t2, s10, BEHIND_CHECK_P24
+	beq t2, s11, P24_CAPTURE_CHECK_TP
+	beq t3, s9, P24_CAPTURE_CHECK_TP
+	j P24_CAPTURE_CHECK_LOOP
+P24_CAPTURE_CHECK_1:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, 7
+	j P24_CAPTURE_CHECK_LOOP
+P24_CAPTURE_CHECK_2:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, 9
+	j P24_CAPTURE_CHECK_LOOP
+P24_CAPTURE_CHECK_3:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, -7
+	j P24_CAPTURE_CHECK_LOOP
+P24_CAPTURE_CHECK_4:
+	addi t0, t0, 1
+	mv t1, a0
+	li t6, -9
+	j P24_CAPTURE_CHECK_LOOP
+BEHIND_CHECK_P13:
+	add t2, t1, t6
+	bgt t2, s1, P13_CAPTURE_CHECK_TP 
+	blt t2, s0, P13_CAPTURE_CHECK_TP
+	lb t4, 0(t2) # t2 = space behind the captured piece
+	beq t4, zero, CAPTURE_TRUE
+	j P13_CAPTURE_CHECK_TP
+BEHIND_CHECK_P24:
+	add t2, t1, t6
+	bgt t2, s1, P24_CAPTURE_CHECK_TP 
+	blt t2, s0, P24_CAPTURE_CHECK_TP
+	lb t4, 0(t2) # t2 = space behind the captured piece
+	beq t4, zero, CAPTURE_TRUE
+	j P24_CAPTURE_CHECK_TP
+CAPTURE_TRUE:
+	mv a1, t2
+	mv a4, t1
+EXIT_CAPTURE_CHECK:
+	lw ra, 0(sp)
+	lw s8, 4(sp)
+	lw s9, 8(sp)
+	lw s10, 12(sp)
+	lw s11, 16(sp)
+	addi sp, sp, 20
+	ret
+
 # PLAYER INPUT FUNCTION
 # TAKES PLAYER INPUT, VERIFIES IF ITS CORRECT
 # IF THE INPUT IS CORRECT, MAKE THE PLAY
@@ -494,5 +784,81 @@ EXIT_INPUT_CPU:
     lw s9, 8(sp)
     lw s10, 12(sp)
     addi sp, sp, 16
+    mv t6, ra # just to print debug
     jal ra, DEBUG_INPUT
+    mv ra, t6 # just to print debug
     ret
+
+# FUNCTION THAT MAKES FINAL VERIFICATIONS AND PRINTS
+
+POSTPROCESSING:
+	addi sp, sp, -4
+	sw ra, 0(sp)
+	bne a4, zero, POSTPROCESSING_CAPTURE_CHECK
+POSTPROCESSING_CONTINUE:
+	bne a4, zero, EXIT_TO_PLAY_AGAIN
+	jal ra, PROMOTE_CHECK
+EXIT_POSTPROCESSING:
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	li a5, 0 # if the player is not playing again
+	ret
+EXIT_TO_PLAY_AGAIN:
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	jal, ra, DEBUG_BOARD
+	li a5, 1 # if the player is playing again
+	j PLAY_AGAIN
+POSTPROCESSING_CAPTURE_CHECK:
+	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
+	jal ra, CAPTURE_CHECK
+	j POSTPROCESSING_CONTINUE
+
+# FUNCTION THAT MAKES FINAL VERIFICATIONS AND PRINTS
+
+POSTPROCESSING_CPU:
+	addi sp, sp, -4
+	sw ra, 0(sp)
+	bne a4, zero, POSTPROCESSING_CPU_CAPTURE_CHECK
+POSTPROCESSING_CPU_CONTINUE:
+	bne a4, zero, EXIT_TO_PLAY_AGAIN_CPU
+	jal ra, PROMOTE_CHECK
+EXIT_POSTPROCESSING_CPU:
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	li a5, 0 # if the CPU is not playing again
+	ret
+EXIT_TO_PLAY_AGAIN_CPU:
+	lw ra, 0(sp)
+	addi sp, sp, 4
+	jal, ra, DEBUG_BOARD
+	li a5, 1 # if the CPU is playing again
+	j PLAY_AGAIN_CPU
+POSTPROCESSING_CPU_CAPTURE_CHECK:
+	mv a0, a1 # calls CAPTURE_CHECK with the destination as origin
+	jal ra, CAPTURE_CHECK
+	j POSTPROCESSING_CPU_CONTINUE
+
+# FUNCTION TO CHECK FOR PROMOTION OF PAWNS
+
+PROMOTE_CHECK:
+	sub t0, a1, s0
+	li t1, 56
+	li t2, 7
+	bge t0, t1, PROMOTE_PAWN_P1
+	ble t0, t2, PROMOTE_PAWN_P2
+	ret
+PROMOTE_PAWN_P1:
+	lb t0, 0(a1)
+	li t1, 1
+	beq t0, t1, PROMOTE_PAWN_SUCCESS
+	ret
+PROMOTE_PAWN_P2:
+	lb t0, 0(a1)
+	li t1, 2
+	beq t0, t1, PROMOTE_PAWN_SUCCESS
+	ret
+PROMOTE_PAWN_SUCCESS:
+	addi t0, t0, 2
+	sb t0, 0(a1)
+	ret
