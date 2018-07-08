@@ -2,10 +2,6 @@
 .eqv VGA_MEMORY_END   0xFF012C00
 .eqv KEYBOARD_MMIO    0xFF200000
 
-.eqv NoteData           0xFF200178
-.eqv NoteClock          0xFF20017C
-.eqv NoteMelody         0xFF200180
-
 .eqv A1 65112
 .eqv C1 58111
 .eqv E1 51110
@@ -38,6 +34,16 @@
 .eqv D8 29194
 .eqv F8 22194
 .eqv H8 15192
+
+.eqv NoteData           0xFF200178
+.eqv NoteClock          0xFF20017C
+.eqv NoteMelody         0xFF200180
+
+######### Macro que verifica se eh a DE2 ###############
+.macro DE2(%salto)
+	li tp, 0x10008000			# carrega tp = 0x10008000
+	bne gp,tp,%salto
+.end_macro
 
 .data
 
@@ -13098,15 +13104,17 @@ GAME_LOOP_2:
 # FUNCTION THAT CHECKS IF THE GAME IS OVER
 
 LIFE_CHECK:
-	beq s2, zero, GAME_OVER
-	beq s3, zero, GAME_OVER
+	beq s2, zero, GAME_OVER_LOSE
+	beq s3, zero, GAME_OVER_WIN
 	ret
+GAME_OVER_LOSE:
+	j GAME_OVER
+GAME_OVER_WIN:
+	j GAME_OVER
 
 # FUNCTION GAME OVER
 
 GAME_OVER:
-	li a6, 4		# parâmetro pra tocar GameOver
-	jal ra, SOUND_FXS
 	j GAME_OVER
 
 # FUNCTION THAT IMPLEMENTS ONE TURN OF THE GAME
@@ -13328,14 +13336,14 @@ P24_CAPTURE_CHECK_4:
 	j P24_CAPTURE_CHECK_LOOP
 BEHIND_CHECK_P13:
 	add t2, t1, t6
-	bgt t2, s1, P13_CAPTURE_CHECK_TP 
+	bge t2, s1, P13_CAPTURE_CHECK_TP 
 	blt t2, s0, P13_CAPTURE_CHECK_TP
 	lb t4, 0(t2) # t2 = space behind the captured piece
 	beq t4, zero, CAPTURE_TRUE
 	j P13_CAPTURE_CHECK_TP
 BEHIND_CHECK_P24:
 	add t2, t1, t6
-	bgt t2, s1, P24_CAPTURE_CHECK_TP 
+	bge t2, s1, P24_CAPTURE_CHECK_TP 
 	blt t2, s0, P24_CAPTURE_CHECK_TP
 	lb t4, 0(t2) # t2 = space behind the captured piece
 	beq t4, zero, CAPTURE_TRUE
@@ -13364,7 +13372,7 @@ INPUT:
     jal ra, PLAYER_INPUT
 INPUT_PLAY_AGAIN:
     addi sp, sp, -4
-    sw a0, 0(sp) # a7 = temporary origin
+    sw a0, 0(sp)
     jal ra, PLAYER_INPUT
     mv a1, a0 # a1 = destination
     lw a0, 0(sp) # a0 = origin
@@ -13563,8 +13571,6 @@ CAPTURE_PLAY_SUCCESS:
     lw s10, 8(sp)
     lw s11, 12(sp)
     addi sp, sp, 16
-    li a6, 1		# parâmetro de comer peça
-    jal ra, SOUND_FXS	# chama som de comer peça
     ret
 CAPTURE_PLAY_FAILURE:
     lw s8, 0(sp)
@@ -13652,8 +13658,6 @@ MOVEMENT_SUCCESS:
     lw s10, 8(sp)
     lw s11, 12(sp)
     addi sp, sp, 16
-    li a6, 0		# parâmetro de movimento
-    jal ra, SOUND_FXS	# chama som de movimento
     ret
 MOVEMENT_PLAY_FAILURE:
     lw s8, 0(sp)
@@ -13852,6 +13856,8 @@ POSTPROCESSING_CPU_CAPTURE_CHECK:
 # FUNCTION TO CHECK FOR PROMOTION OF PAWNS
 
 PROMOTE_CHECK:
+	addi sp, sp, -4
+	sw ra, 0(sp)
 	sub t0, a1, s0
 	li t1, 56
 	li t2, 7
@@ -13872,10 +13878,11 @@ PROMOTE_PAWN_SUCCESS:
 	addi t0, t0, 2
 	sb t0, 0(a1)
 	mv a6, a1
+	sub a6, a6, s0
 	mv a7, t0
 	jal ra, PRINT_TOKEN
-	li a6, 2		# parâmetro de promoção
-    jal ra, SOUND_FXS	# chama som de promoção
+	lw ra, 0(sp)
+	addi sp, sp, 4
 	ret
 
 # FUNCTION TO PRINT THE TOKEN ON THE SCREEN
@@ -14189,16 +14196,16 @@ PRINT_TOKEN_END:
 	addi sp, sp, 28
     ret
 
-
 SOUND_FXS:
-	#li a6, 4	# Set FX
-	addi sp, sp -24 # aloca espaço
+	#li a6, 5	# Set FX
+	addi sp, sp -28 # aloca espaço
 	sw ra, 0(sp) # salva ra
 	sw a0, 4(sp) # salva a0
 	sw a1, 8(sp) # salva a1
 	sw a2, 12(sp) # salva a2
 	sw a3, 16(sp) # salva a3
 	sw a6, 20(sp) # salva a6
+	sw a7, 24(sp) # salva a7
 	li a3, 127	# Set volume
 	
 	li t0, 0	# Movimenta a peça
@@ -14216,6 +14223,9 @@ SOUND_FXS:
 	li t0, 4	# Player perde
 	beq t0, a6, LOSE_SOUND
 
+	li t0, 5	# Movimento errado
+	beq t0, a6, ERROR_SOUND
+
 ###########################################
 #        MidiOut 31 (2015/1)              #
 #  a0 = pitch (0-127)                    #
@@ -14232,6 +14242,11 @@ SOUND_FXS:
 # Note Data (ecall) = 32 bits     |   1'b - Melody   |   4'b - Instrument   |   7'b - Volume   |   7'b - Pitch   |   13'b - Duration   |
 #
 #################################################################################################
+midiOut: DE2(midiOutDE2)
+	li a7,31		# Chama o ecall normal
+	ecall
+	j fimmidiOut
+
 midiOutDE2:	
 	li t0, NoteData
     add t1, zero, zero
@@ -14289,6 +14304,11 @@ fimmidiOut: jr ra
 # Note Data (ecall)   	= 32 bits     |   1'b - Melody   |   4'b - Instrument   |   7'b - Volume   |   7'b - Pitch   |   13'b - Duration   |
 #
 #################################################################################################
+midiOutSync: DE2(midiOutSyncDE2)
+	li a7,33		# Chama o ecall normal
+	ecall
+	j fimmidiOutSync
+	
 midiOutSyncDE2:	
 	li t0, NoteData
     add t1, zero, zero
@@ -14349,10 +14369,10 @@ MOV_SOUND:
 	li a0, 59	# nota
 	li a1, 100	# duração 0,1s
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 63	# nota
 	li a1, 250	# duração 0,25s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	j END_SOUND_FX
 
 EAT_SOUND:
@@ -14362,10 +14382,10 @@ EAT_SOUND:
 	li a0, 70	# nota
 	li a1, 90	# duração 0,1s
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 74	# nota
 	li a1, 220	# duração 0,25s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	j END_SOUND_FX
 
 QUEEN_SOUND:
@@ -14373,66 +14393,66 @@ QUEEN_SOUND:
 	## [72-79] pipe
 	##li a7, 33
 	li a2, 120	#instrumento pipe
-	li a1, 20	# duração 0,01s
+	li a1, 15	# duração 0,01s
 
 	li a0, 60 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 55 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 64 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 67 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 72 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 67 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 
 
 	li a0, 55 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 63 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 68 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 63 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 68 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 72 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 75 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 80 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 75 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 
 
 	li a0, 62 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 65 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 69 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 65 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 69 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 73 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 76 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 73 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 76 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 82 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 76 	# nota
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	j END_SOUND_FX
 
 WIN_SOUND:
@@ -14442,255 +14462,255 @@ WIN_SOUND:
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 53
 	li a1, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 53
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 60
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 60
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 64
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 64
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 67
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 67
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 72
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 72
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 76
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 76
 	li a1, 400
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 79
 	li a1, 400
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 
 	li a0, 72
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 76
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	# Session 2
 	li a0, 50
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 56
 	li a1, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 56
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 60
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 56
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 63
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 63
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 68
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 68
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 72
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 72
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 75
 	li a1, 400
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 80
 	li a1, 400
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 72
 	li a1, 400
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 
 	# Session 3
 	li a0, 53
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 58
 	li a1, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 
 	li a0, 58
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 62
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 63
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 65
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 65
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 70
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 70
 	li a1, 75
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 74
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 74
 	li a1, 400
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 77
 	li a1, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 
 	li a0, 74
 	li a1, 400
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 82
 	li a1, 400
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	
 	li a0, 82
 	li a1, 75
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	
 	li a0, 82
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	
 	li a0, 84
 	li a1, 400
 	li a2, 2
 	#li a7, 31
-	jal ra, midiOutDE2
+	jal ra, midiOut
 	li a0, 82
 	li a2, 2
 	#li a7, 33
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 		
 	j END_SOUND_FX
 	
@@ -14702,48 +14722,60 @@ LOSE_SOUND:
 	li a0, 60	# nota
 	li a1, 500	# duração 0,5s
 	li a2, 19	# instrumento brass
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60	# nota
 	li a1, 500	# duração 0,5s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60	# nota
 	li a1, 100	# duração 0,1s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60	# nota
 	li a1, 500	# duração 0,5s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 63	# nota
 	li a1, 500	# duração 0,5s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 62	# nota
 	li a1, 100	# duração 0,1s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 62	# nota
 	li a1, 500	# duração 0,5s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60	# nota
 	li a1, 100	# duração 0,1s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60	# nota
 	li a1, 500	# duração 0,5s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 59	# nota
 	li a1, 100	# duração 0,1s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	li a0, 60	# nota
 	li a1, 1000	# duração 1s
-	jal ra, midiOutSyncDE2
+	jal ra, midiOutSync
 	j END_SOUND_FX
 	
+ERROR_SOUND:
+	# SOLTA O SOM DJ
+	## [80 ~ 103] synth
+	## [120 ~ 127] sfx
+	li a2, 90	# instrumento synth
+	li a0, 30	# nota
+	li a1, 100	# duração 0,1s
+	jal ra, midiOutSync
+	li a0, 29	# nota
+	li a1, 400	# duração 0,4s
+	jal ra, midiOutSync
+	j END_SOUND_FX
+
 END_SOUND_FX:
-	#li a7, 10
-	#jal ra, midiOutSyncDE2
 	lw ra, 0(sp) # recupera ra
 	lw a0, 4(sp) # salva a0
 	lw a1, 8(sp) # salva a1
 	lw a2, 12(sp) # salva a2
 	lw a3, 16(sp) # salva a3
 	lw a6, 20(sp) # salva a6
-	addi sp, sp, 24 # volta sp ao lugar
+	lw a7, 24(sp) # salva a7
+	addi sp, sp, 28 # volta sp ao lugar
 	jr ra 	# volta ao programa principal
 	#ret
