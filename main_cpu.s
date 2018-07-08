@@ -13094,9 +13094,13 @@ GAME_LOOP_2:
 # FUNCTION THAT CHECKS IF THE GAME IS OVER
 
 LIFE_CHECK:
-	beq s2, zero, GAME_OVER
-	beq s3, zero, GAME_OVER
+	beq s2, zero, GAME_OVER_LOSE
+	beq s3, zero, GAME_OVER_WIN
 	ret
+GAME_OVER_LOSE:
+	j GAME_OVER
+GAME_OVER_WIN:
+	j GAME_OVER
 
 # FUNCTION GAME OVER
 
@@ -13322,14 +13326,14 @@ P24_CAPTURE_CHECK_4:
 	j P24_CAPTURE_CHECK_LOOP
 BEHIND_CHECK_P13:
 	add t2, t1, t6
-	bgt t2, s1, P13_CAPTURE_CHECK_TP 
+	bge t2, s1, P13_CAPTURE_CHECK_TP 
 	blt t2, s0, P13_CAPTURE_CHECK_TP
 	lb t4, 0(t2) # t2 = space behind the captured piece
 	beq t4, zero, CAPTURE_TRUE
 	j P13_CAPTURE_CHECK_TP
 BEHIND_CHECK_P24:
 	add t2, t1, t6
-	bgt t2, s1, P24_CAPTURE_CHECK_TP 
+	bge t2, s1, P24_CAPTURE_CHECK_TP 
 	blt t2, s0, P24_CAPTURE_CHECK_TP
 	lb t4, 0(t2) # t2 = space behind the captured piece
 	beq t4, zero, CAPTURE_TRUE
@@ -13358,7 +13362,7 @@ INPUT:
     jal ra, PLAYER_INPUT
 INPUT_PLAY_AGAIN:
     addi sp, sp, -4
-    sw a0, 0(sp) # a7 = temporary origin
+    sw a0, 0(sp)
     jal ra, PLAYER_INPUT
     mv a1, a0 # a1 = destination
     lw a0, 0(sp) # a0 = origin
