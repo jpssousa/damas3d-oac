@@ -13862,6 +13862,7 @@ PROMOTE_PAWN_SUCCESS:
 	addi t0, t0, 2
 	sb t0, 0(a1)
 	mv a6, a1
+	sub a6, a6, s0
 	mv a7, t0
 	jal ra, PRINT_TOKEN
 	ret
