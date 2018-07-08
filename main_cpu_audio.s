@@ -13108,8 +13108,12 @@ LIFE_CHECK:
 	beq s3, zero, GAME_OVER_WIN
 	ret
 GAME_OVER_LOSE:
+	li a6, 4		# som de derrota
+	j SOUND_FXS		# toca som
 	j GAME_OVER
 GAME_OVER_WIN:
+	li a6, 3		# som de vitória
+	j SOUND_FXS		# toca som
 	j GAME_OVER
 
 # FUNCTION GAME OVER
@@ -13571,6 +13575,8 @@ CAPTURE_PLAY_SUCCESS:
     lw s10, 8(sp)
     lw s11, 12(sp)
     addi sp, sp, 16
+    li a6, 1		# som de captura
+	j SOUND_FXS		# toca som
     ret
 CAPTURE_PLAY_FAILURE:
     lw s8, 0(sp)
@@ -13658,6 +13664,8 @@ MOVEMENT_SUCCESS:
     lw s10, 8(sp)
     lw s11, 12(sp)
     addi sp, sp, 16
+    li a6, 0		# som de movimento
+	j SOUND_FXS		# toca som
     ret
 MOVEMENT_PLAY_FAILURE:
     lw s8, 0(sp)
@@ -13665,6 +13673,8 @@ MOVEMENT_PLAY_FAILURE:
     lw s10, 8(sp)
     lw s11, 12(sp)
     addi sp, sp, 16
+    li a6, 5		# som de erro
+	j SOUND_FXS		# toca som
     j BASIC_POSTPROCESSING_FAILURE
 
 # FUNCTION TO GET PLAYER INPUT
@@ -13788,6 +13798,8 @@ CPU_MOVEMENT_SUCCESS:
     lb t1, 0(a1)
     sb t0, 0(a1)
     sb t1, 0(a0)
+    li a6, 0		# som de movimento
+	j SOUND_FXS		# toca som
     j EXIT_INPUT_CPU
 CPU_CAPTURE:
     lb t0, 0(a0)
@@ -13796,6 +13808,8 @@ CPU_CAPTURE:
     sb t1, 0(a0)
     sb zero, 0(a4)
     addi s2, s2, -1
+    li a6, 1		# som de captura
+	j SOUND_FXS		# toca som
     j EXIT_INPUT_CPU
 EXIT_INPUT_CPU:
     lw ra, 0(sp)
@@ -13883,6 +13897,8 @@ PROMOTE_PAWN_SUCCESS:
 	jal ra, PRINT_TOKEN
 	lw ra, 0(sp)
 	addi sp, sp, 4
+	li a6, 2		# som de promoção
+	j SOUND_FXS		# toca som
 	ret
 
 # FUNCTION TO PRINT THE TOKEN ON THE SCREEN
