@@ -1395,6 +1395,8 @@ POSTPROCESSING_CPU_CAPTURE_CHECK:
 # FUNCTION TO CHECK FOR PROMOTION OF PAWNS
 
 PROMOTE_CHECK:
+	addi sp, sp, -4
+	sw ra, 0(sp)
 	sub t0, a1, s0
 	li t1, 56
 	li t2, 7
@@ -1418,6 +1420,8 @@ PROMOTE_PAWN_SUCCESS:
 	sub a6, a6, s0
 	mv a7, t0
 	jal ra, PRINT_TOKEN
+	lw ra, 0(sp)
+	addi sp, sp, 4
 	ret
 
 # FUNCTION TO PRINT THE TOKEN ON THE SCREEN
