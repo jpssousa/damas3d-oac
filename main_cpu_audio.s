@@ -13881,6 +13881,15 @@ PROMOTE_PAWN_SUCCESS:
 # FUNCTION TO PRINT THE TOKEN ON THE SCREEN
 
 PRINT_TOKEN:
+	addi sp, sp, -28
+	sw ra, 0(sp)
+	sw s5, 4(sp)
+	sw s6, 8(sp)
+	sw s7, 12(sp)
+	sw s8, 16(sp)
+	sw s9, 20(sp)
+	sw s10, 24(sp)
+
     li t0, 0
     beq t0, a6, PRINT_A1
     
@@ -14169,9 +14178,17 @@ PRINT_TILE_INNER_LOOP:	# 16 colunas
     addi s9, s9, 1
     j PRINT_TILE_INNER_LOOP
     
-    
 PRINT_TOKEN_END:
+	lw ra, 0(sp)
+	lw s5, 4(sp)
+	lw s6, 8(sp)
+	lw s7, 12(sp)
+	lw s8, 16(sp)
+	lw s9, 20(sp)
+	lw s10, 24(sp)
+	addi sp, sp, 28
     ret
+
 
 SOUND_FXS:
 	#li a6, 4	# Set FX
