@@ -1,7 +1,7 @@
 .text
 
 SOUND_FXS:
-	li a6, 2	# Set FX
+	li a6, 3	# Set FX
 	li a3, 127	# Set volume
 	
 	li t0, 0	# Movimenta a peça
