@@ -1339,12 +1339,15 @@ CPU_MOVEMENT_PLAY_2:
     j CPU_MOVEMENT_LOOP_CONTINUE
 CPU_MOVEMENT_PLAY_PROMOTED:
 	addi t2, t0, 7
+	bge t2, s1, CPU_MOVEMENT_PLAY_PROMOTED_CONTINUE
     lb t4, 0(t2)
     beq t4, zero, CPU_MOVEMENT_SUCCESS
     addi t2, t0, 9
     lb t4, 0(t2)
     beq t4, zero, CPU_MOVEMENT_SUCCESS
+CPU_MOVEMENT_PLAY_PROMOTED_CONTINUE:
 	addi t2, t0, -7
+	blt t2, s0, CPU_MOVEMENT_LOOP_CONTINUE
     lb t4, 0(t2)
     beq t4, zero, CPU_MOVEMENT_SUCCESS
     addi t2, t0, -9
