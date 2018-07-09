@@ -1275,6 +1275,7 @@ CPU_MOVEMENT:
     mv t0, s0
     addi s8, a3, 2 # value of the queen of player cpu
 CPU_MOVEMENT_LOOP:
+	bge t0, s1, GAME_OVER_WIN
     lb t1, 0(t0)
     beq t1, a3, CPU_MOVEMENT_PLAY_TP
     beq t1, s8, CPU_MOVEMENT_PLAY_TP
